@@ -1,3 +1,4 @@
+import 'package:budgetize/bottomNavigationBar.dart';
 import 'package:budgetize/incomeScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -70,28 +71,7 @@ class _HomeState extends State<Home> {
       )
           //child: _children.elementAt(_currentIndex),
           ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed, // makes more than 3 items possible
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.black.withOpacity(.60),
-        onTap: (value) {
-          setState(() => _currentIndex = value);
-          print("Navigation bar pressed. Current index is $_currentIndex.");
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: new Icon(Icons.pie_chart),
-            title: new Text('Podsumowanie'),
-          ),
-          BottomNavigationBarItem(
-            icon: new Icon(Icons.bar_chart),
-            title: new Text('Analiza'),
-          ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.schedule), title: Text('Transakcje')),
-        ],
-      ),
+      bottomNavigationBar: NavigationBar(),
     );
   }
 }
