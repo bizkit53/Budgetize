@@ -1,7 +1,10 @@
 import 'package:budgetize/main.dart';
+import 'package:budgetize/transaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/number_symbols_data.dart';
 import 'category.dart';
 
 DateFormat formatter = DateFormat('dd-MM-yyyy');
@@ -15,23 +18,37 @@ class IncomeScreen extends StatefulWidget {
 class _IncomeScreenState extends State<IncomeScreen> {
   IncomeCategory selectedCategory;
   Color mainColor = Colors.green;
+  String transactionName;
+  double transactionAmount;
+
+  void addTransaction(Transaction transaction){
+    print('Transaction added:\n'
+        'Name: ${transaction.name}\n'
+        'Account: ${transaction.account}\n'
+        'Amount: ${transaction.amount}\n'
+        'Date: ${transaction.date}\n'
+        'Category: ${transaction.category}\n'
+        'Type: ${transaction.type}');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text('Add income'),
-          backgroundColor: mainColor,
-        ),
-        body: SafeArea(
-            child: Column(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text('Add income'),
+        backgroundColor: mainColor,
+      ),
+      body: SafeArea(
+        child: Column(
           children: <Widget>[
             Flexible(
               flex: 1,
               child: Container(),
             ),
-            Flexible(   // transaction name
+            Flexible(
+              // transaction name
               flex: 5,
               fit: FlexFit.tight,
               child: TextField(
@@ -44,7 +61,8 @@ class _IncomeScreenState extends State<IncomeScreen> {
                 ),
               ),
             ),
-            Flexible( // account
+            Flexible(
+              // account
               flex: 5,
               fit: FlexFit.tight,
               child: TextField(
@@ -57,35 +75,40 @@ class _IncomeScreenState extends State<IncomeScreen> {
                 ),
               ),
             ),
-            Flexible( // date //TODO wielkosc okna wyboru daty
-                              //TODO kolor okna wyboru daty
-              flex: 5,
-              //fit: FlexFit.tight,
-              child: FlatButton(
-                color: mainColor,
-                shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
-                  child: Text(formatted,
-                  style: new TextStyle(
-                    fontSize: 28,
-                  ),),
-                onPressed: () {
-                    showDatePicker(context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2100)
-                    ).then((date) {
+            Flexible(
+                // date //TODO date picker size
+                //TODO date picker color
+                flex: 5,
+                //fit: FlexFit.tight,
+                child: FlatButton(
+                  color: mainColor,
+                  shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(30.0)),
+                  child: Text(
+                    formatted,
+                    style: new TextStyle(
+                      fontSize: 28,
+                    ),
+                  ),
+                  onPressed: () {
+                    showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime(2100))
+                        .then((date) {
                       setState(() {
                         formatted = formatter.format(date);
                       });
                     });
-                },
-              )
-            ),
-            Flexible( // category
+                  },
+                )),
+            Flexible(
+              // category
               flex: 5,
               fit: FlexFit.tight,
               child: DropdownButton(
-                hint:  Text("Select category"),
+                hint: Text("Select category"),
                 value: selectedCategory,
                 onChanged: (IncomeCategory Value) {
                   setState(() {
@@ -93,15 +116,17 @@ class _IncomeScreenState extends State<IncomeScreen> {
                   });
                 },
                 items: incomeCategories.map((IncomeCategory category) {
-                  return  DropdownMenuItem<IncomeCategory>(
+                  return DropdownMenuItem<IncomeCategory>(
                     value: category,
                     child: Row(
                       children: <Widget>[
                         category.icon,
-                        SizedBox(width: 45,),
+                        SizedBox(
+                          width: 45,
+                        ),
                         Text(
                           category.name,
-                          style:  TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.black),
                         ),
                       ],
                     ),
@@ -109,11 +134,17 @@ class _IncomeScreenState extends State<IncomeScreen> {
                 }).toList(),
               ),
             ),
-            Flexible( // amount
+            Flexible(
+              // amount
               flex: 5,
               fit: FlexFit.tight,
               child: TextField(
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                maxLength: 18,
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r"^\d*\.?\d?\d?")),],
+                onChanged: (value){
+                  this.transactionAmount = num.tryParse(value);
+                },
                 decoration: InputDecoration(
                   border: new OutlineInputBorder(
                     borderRadius: new BorderRadius.circular(50.0),
@@ -123,7 +154,8 @@ class _IncomeScreenState extends State<IncomeScreen> {
                 ),
               ),
             ),
-            Flexible( // cancel and add buttons
+            Flexible(
+              // cancel and add buttons
               flex: 18,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -153,14 +185,17 @@ class _IncomeScreenState extends State<IncomeScreen> {
                       color: mainColor,
                       textColor: Colors.white,
                       child: Text("Add"),
-                      onPressed: () {},
+                      onPressed: () {
+                        //addTransaction(transaction); //TODO read data from field in order add transaction
+                      },
                     ),
                   ),
                 ],
               ),
             ),
           ],
-        )));
+        ),
+      ),
+    );
   }
 }
-

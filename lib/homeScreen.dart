@@ -29,48 +29,52 @@ class _HomeState extends State<Home> {
         title: Text('Budgetize'),
       ),
       body: SafeArea(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                child: SizedBox(
-                  child: FloatingActionButton(
-                    heroTag: "removeButton",
-                      elevation: 0,
-                      onPressed: (){print("Remove button pressed.");},
-                      backgroundColor: Colors.red,
-                      child: Icon(
-                        Icons.remove,
-                        size: 45,
-                      )), // not implemented yet
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  child: SizedBox(
+                    child: FloatingActionButton(
+                        heroTag: "removeButton",
+                        elevation: 0,
+                        onPressed: () {
+                          print("Remove button pressed.");
+                        },
+                        backgroundColor: Colors.red,
+                        child: Icon(
+                          Icons.remove,
+                          size: 45,
+                        )), // not implemented yet
+                  ),
                 ),
-              ),
-              Container(
-                width: 80,
-                height: 80,
-                margin: EdgeInsets.only(bottom: 10),
-                child: SizedBox(
-                  child: FloatingActionButton(
-                      heroTag: "addButton",
-                      elevation: 0,
-                      onPressed: (){print("Add button pressed.");
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => IncomeScreen()));
-                      },
-                      backgroundColor: Colors.green,
-                      child: Icon(Icons.add, size: 45)), // not implemented yet
+                Container(
+                  width: 80,
+                  height: 80,
+                  margin: EdgeInsets.only(bottom: 10),
+                  child: SizedBox(
+                    child: FloatingActionButton(
+                        heroTag: "addButton",
+                        elevation: 0,
+                        onPressed: () {
+                          print("Add button pressed.");
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => IncomeScreen()));
+                        },
+                        backgroundColor: Colors.green,
+                        child:
+                            Icon(Icons.add, size: 45)), // not implemented yet
+                  ),
                 ),
-              ),
-            ],
-          )
-        ],
-      )
-          //child: _children.elementAt(_currentIndex),
-          ),
+              ],
+            )
+          ],
+        ),
+      ),
       bottomNavigationBar: NavigationBar(),
     );
   }
