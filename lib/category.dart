@@ -1,37 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
+part 'category.g.dart';
+
+@HiveType(typeId: 4)
 class Category{
+  @HiveField(0)
   String name;
-  Icon icon;
 
-  Category(this.name, this.icon);
+  Category(this.name);
+
+  @override
+  String toString() {
+    return this.name;
+  }
 }
 
 class IncomeCategory extends Category{
-  IncomeCategory(String name, Icon icon) : super(name, icon);
+  IncomeCategory(String name) : super(name);
+}
+
+class IncomeCategoryWithIcon extends IncomeCategory{
+  Icon icon;
+  IncomeCategoryWithIcon(String name, this.icon) : super(name);
 }
 
 class ExpenditureCategory extends Category{
-  ExpenditureCategory(String name, Icon icon) : super(name, icon);
+  ExpenditureCategory(String name) : super(name);
 }
 
-List<IncomeCategory> incomeCategories = <IncomeCategory>[
-  IncomeCategory('Salary',Icon(Icons.monetization_on,color:  const Color(0xFF167F67),)),
-  IncomeCategory('Investment profit',Icon(Icons.account_balance,color:  const Color(0xFF167F67),)),
-  IncomeCategory('Benefits',Icon(Icons.spa,color:  const Color(0xFF167F67),)),
-  IncomeCategory('Loan payback',Icon(Icons.credit_card,color:  const Color(0xFF167F67),)),
-  IncomeCategory('Gift',Icon(Icons.card_giftcard,color:  const Color(0xFF167F67),)),
-  IncomeCategory('Others',Icon(Icons.mood,color:  const Color(0xFF167F67),)),
+class ExpenditureCategoryWithIcon extends ExpenditureCategory{
+  Icon icon;
+  ExpenditureCategoryWithIcon(String name, this.icon) : super(name);
+}
+
+List<IncomeCategoryWithIcon> incomeCategories = <IncomeCategoryWithIcon>[
+  IncomeCategoryWithIcon('Salary',Icon(Icons.monetization_on,color:  const Color(0xFF167F67),)),
+  IncomeCategoryWithIcon('Investment profit',Icon(Icons.account_balance,color:  const Color(0xFF167F67),)),
+  IncomeCategoryWithIcon('Benefits',Icon(Icons.spa,color:  const Color(0xFF167F67),)),
+  IncomeCategoryWithIcon('Loan payback',Icon(Icons.credit_card,color:  const Color(0xFF167F67),)),
+  IncomeCategoryWithIcon('Gift',Icon(Icons.card_giftcard,color:  const Color(0xFF167F67),)),
+  IncomeCategoryWithIcon('Others',Icon(Icons.mood,color:  const Color(0xFF167F67),)),
 ];
 
-List<ExpenditureCategory> expenditureCategories = <ExpenditureCategory>[
-  ExpenditureCategory('Shopping',Icon(Icons.shopping_basket,color:  const Color(0xFF7F1667),)),
-  ExpenditureCategory('Transport',Icon(Icons.emoji_transportation,color:  const Color(0xFF7F1667),)),
-  ExpenditureCategory('Entertainment',Icon(Icons.attractions,color:  const Color(0xFF7F1667),)),
-  ExpenditureCategory('Relaxation',Icon(Icons.monetization_on,color:  const Color(0xFF7F1667),)),
-  ExpenditureCategory('Health',Icon(Icons.monetization_on,color:  const Color(0xFF7F1667),)),
-  ExpenditureCategory('Sport',Icon(Icons.fitness_center,color:  const Color(0xFF7F1667),)),
-  ExpenditureCategory('Family',Icon(Icons.monetization_on,color:  const Color(0xFF7F1667),)),
-  ExpenditureCategory('Bills',Icon(Icons.monetization_on,color:  const Color(0xFF7F1667),)),
-  ExpenditureCategory('Others',Icon(Icons.mood,color:  const Color(0xFF7F1667),)),
+List<ExpenditureCategoryWithIcon> expenditureCategories = <ExpenditureCategoryWithIcon>[
+  ExpenditureCategoryWithIcon('Shopping',Icon(Icons.shopping_basket,color:  const Color(0xFF7F1667),)),
+  ExpenditureCategoryWithIcon('Transport',Icon(Icons.emoji_transportation,color:  const Color(0xFF7F1667),)),
+  ExpenditureCategoryWithIcon('Entertainment',Icon(Icons.attractions,color:  const Color(0xFF7F1667),)),
+  ExpenditureCategoryWithIcon('Relaxation',Icon(Icons.monetization_on,color:  const Color(0xFF7F1667),)),
+  ExpenditureCategoryWithIcon('Health',Icon(Icons.monetization_on,color:  const Color(0xFF7F1667),)),
+  ExpenditureCategoryWithIcon('Sport',Icon(Icons.fitness_center,color:  const Color(0xFF7F1667),)),
+  ExpenditureCategoryWithIcon('Family',Icon(Icons.monetization_on,color:  const Color(0xFF7F1667),)),
+  ExpenditureCategoryWithIcon('Bills',Icon(Icons.monetization_on,color:  const Color(0xFF7F1667),)),
+  ExpenditureCategoryWithIcon('Others',Icon(Icons.mood,color:  const Color(0xFF7F1667),)),
 ];

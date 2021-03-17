@@ -1,18 +1,37 @@
 import 'package:budgetize/account.dart';
 import 'package:budgetize/category.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 
-enum TransactionType {income, expenditure}
+part 'transaction.g.dart';
 
+DateFormat formatter = DateFormat('dd-MM-yyyy');
+
+@HiveType(typeId: 2)
+enum TransactionType {
+  @HiveField(0)
+  income,
+  @HiveField(1)
+  expenditure
+}
+
+@HiveType(typeId: 3)
 class Transaction {
+  @HiveField(0)
   String name;
+  @HiveField(1)
   Account account;
+  @HiveField(2)
   double amount;
+  @HiveField(3)
   DateTime date;
+  @HiveField(4)
   Category category;
+  @HiveField(5)
   TransactionType type;
 
-  Transaction(String name, double amount, Account account, DateTime date, Category category, TransactionType type) {
+  Transaction(String name, double amount, Account account, DateTime date,
+      Category category, TransactionType type) {
     this.name = name;
     this.amount = amount;
     this.account = account;
@@ -21,11 +40,14 @@ class Transaction {
     this.type = type;
   }
 
-  bool isNull(){
-    if(this.amount == null || this.account == null || this.date == null || this.category == null)
-      return true;
-    else
-      return false;
+  @override
+  String toString() {
+    String output = "Transaction name: ${this.name}\n" +
+        "Transaction type: ${this.type}\n" +
+        "Account: ${this.account.toString()}\n" +
+        "Date: ${formatter.format(this.date)}\n" +
+        "Category: ${this.category.toString()}\n" +
+        "Ammount: ${this.amount}\n";
+    return output;
   }
 }
-
