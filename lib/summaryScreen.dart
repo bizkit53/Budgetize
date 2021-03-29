@@ -1,7 +1,8 @@
+import 'package:budgetize/transaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'incomeScreen.dart';
+import 'transactionScreen.dart';
 
 class SummaryScreen extends StatefulWidget {
   @override
@@ -27,6 +28,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       elevation: 0,
                       onPressed: () {
                         print("Remove button pressed.");
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => TransactionScreen(transactionType: TransactionType.expenditure,)));
                       },
                       backgroundColor: Colors.red,
                       child: Icon(
@@ -46,7 +49,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       onPressed: () {
                         print("Add button pressed.");
                         Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => IncomeScreen()));
+                            builder: (context) => TransactionScreen(transactionType: TransactionType.income,)));
                       },
                       backgroundColor: Colors.green,
                       child:
