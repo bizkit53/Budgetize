@@ -16,22 +16,17 @@ class Category{
   }
 }
 
-class IncomeCategory extends Category{
-  IncomeCategory(String name) : super(name);
-}
-
-class IncomeCategoryWithIcon extends IncomeCategory{
+class CategoryWithIcon extends Category{
   Icon icon;
-  IncomeCategoryWithIcon(String name, this.icon) : super(name);
+  CategoryWithIcon(String name, this.icon) : super(name);
 }
 
-class ExpenditureCategory extends Category{
-  ExpenditureCategory(String name) : super(name);
+class IncomeCategoryWithIcon extends CategoryWithIcon{
+  IncomeCategoryWithIcon(String name, Icon icon) : super(name, icon);
 }
 
-class ExpenditureCategoryWithIcon extends ExpenditureCategory{
-  Icon icon;
-  ExpenditureCategoryWithIcon(String name, this.icon) : super(name);
+class ExpenditureCategoryWithIcon extends CategoryWithIcon{
+  ExpenditureCategoryWithIcon(String name, Icon icon) : super(name, icon);
 }
 
 List<IncomeCategoryWithIcon> incomeCategories = <IncomeCategoryWithIcon>[
