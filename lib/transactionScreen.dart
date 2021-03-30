@@ -33,6 +33,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Category categoryType;
   List<CategoryWithIcon> categories;
   TransactionType type = TransactionType.income;
+  bool valuesInitialized = false;
 
   bool isNull() {
     if (this.account == null ||
@@ -57,6 +58,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       this.categories = expenditureCategories;
       this.selectedCategory = expenditureCategories.last;
     }
+    this.valuesInitialized = true;
   }
 
   bool addTransaction() {
@@ -80,7 +82,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    setTransactionType();
+    if(valuesInitialized == false)
+      setTransactionType();
     return Theme(
       data: ThemeData(
         primarySwatch: mainColor,
