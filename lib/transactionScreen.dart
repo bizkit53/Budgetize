@@ -32,14 +32,15 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Category selectedCategory;
   Category categoryType;
   List<CategoryWithIcon> categories;
-  TransactionType type = TransactionType.income;
+  TransactionType type;
   bool valuesInitialized = false;
 
   bool isNull() {
     if (this.account == null ||
         this.transactionAmount == null ||
         this.date == null ||
-        this.selectedCategory == null)
+        this.selectedCategory == null ||
+        this.type == null)
       return true;
     else
       return false;
@@ -58,6 +59,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       this.categories = expenditureCategories;
       this.selectedCategory = expenditureCategories.last;
     }
+    this.type = widget.transactionType;
     this.valuesInitialized = true;
   }
 
@@ -108,6 +110,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 flex: 5,
                 fit: FlexFit.tight,
                 child: TextField(
+                  autofocus: true,
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   //maxLength: 18,
                   inputFormatters: [
@@ -241,7 +244,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       },
                     );
                   },
-                  autofocus: true,
                   decoration: InputDecoration(
                     icon: Icon(Icons.description, color: mainColor,),
                     //border: new OutlineInputBorder(
