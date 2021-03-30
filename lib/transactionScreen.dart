@@ -8,20 +8,21 @@ import 'package:intl/intl.dart';
 import 'package:intl/number_symbols_data.dart';
 import 'account.dart';
 import 'category.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 DateFormat formatter = DateFormat('dd-MM-yyyy');
 String formatted = formatter.format(DateTime.now());
 
-class IncomeScreen extends StatefulWidget {
+class TransactionScreen extends StatefulWidget {
   final TransactionType transactionType;
 
-  const IncomeScreen({Key key, this.transactionType }) : super(key: key);
+  const TransactionScreen({Key key, this.transactionType }) : super(key: key);
 
   @override
-  _IncomeScreenState createState() => _IncomeScreenState();
+  _TransactionScreenState createState() => _TransactionScreenState();
 }
 
-class _IncomeScreenState extends State<IncomeScreen> {
+class _TransactionScreenState extends State<TransactionScreen> {
   Color mainColor;
   String appBarTitle;
   String transactionName;
@@ -58,7 +59,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
     }
   }
 
-  void addTransaction() {
+  bool addTransaction() {
     if (isNull() == false) {
       var transactionBox = Hive.box<Transaction>('transactions');
       var transaction = new Transaction(
@@ -71,7 +72,10 @@ class _IncomeScreenState extends State<IncomeScreen> {
       transactionBox.add(transaction);
 
       print(transaction.toString());
+      return true;
     }
+    else
+      return false;
   }
 
   @override
@@ -278,8 +282,18 @@ class _IncomeScreenState extends State<IncomeScreen> {
                         textColor: Colors.white,
                         child: Text("Add"),
                         onPressed: () {
-                          addTransaction();
-                          Navigator.of(context).pop();
+                          if(addTransaction()) {
+                            Navigator.of(context).pop();
+                          }
+                          else{
+                            Fluttertoast.showToast(msg: "Some required fields have been omitted.",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+                          };
                         },
                       ),
                     ),
