@@ -26,9 +26,17 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Budgetize'),
+        title: Text('Budgetize', style: TextStyle(fontWeight: FontWeight.bold),),
       ),
-      body: _children[_currentIndex],
+      body: GestureDetector(
+          child: _children[_currentIndex],
+          onHorizontalDragEnd: (details) {
+            if (details.primaryVelocity > 0) {
+              setState(() => _currentIndex = (_currentIndex - 1) % 3);
+            } else if(details.primaryVelocity < 0){
+              setState(() => _currentIndex = (_currentIndex + 1) % 3);
+            }
+          }),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed, // makes more than 3 items possible
@@ -41,14 +49,14 @@ class _HomeState extends State<Home> {
         items: [
           BottomNavigationBarItem(
             icon: new Icon(Icons.pie_chart),
-            title: new Text('Podsumowanie'),
+            title: new Text('Summary'),
           ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.schedule), title: Text('Transactions')),
           BottomNavigationBarItem(
             icon: new Icon(Icons.bar_chart),
-            title: new Text('Analiza'),
+            title: new Text('Analysis'),
           ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.schedule), title: Text('Transakcje')),
         ],
       ),
     );
