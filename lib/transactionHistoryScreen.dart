@@ -32,143 +32,160 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        children: <Widget>[
-          Container(
-            height: 45,
-            width: double.infinity,
-            color: Colors.indigo,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      date = date.subtract(Duration(days: 30));
-                      formattedDate = monthPickerDateFormat.format(date);
-                      clearSums();
-                    });
-                  },
-                  icon: Icon(
-                      Icons.keyboard_arrow_left,
-                      color: Colors.white, size: 40
+    return Container(
+      color: Color.fromRGBO(223, 223, 223, 100),
+      child: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Container(
+              height: 45,
+              width: double.infinity,
+              color: Colors.indigo,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        date = date.subtract(Duration(days: 30));
+                        formattedDate = monthPickerDateFormat.format(date);
+                        clearSums();
+                      });
+                    },
+                    icon: Icon(
+                        Icons.keyboard_arrow_left,
+                        color: Colors.white, size: 40
+                    ),
+                    padding: EdgeInsets.all(0.0),
                   ),
-                  padding: EdgeInsets.all(0.0),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  width: 180,
-                  child: Text(
-                    formattedDate.toString(),
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  Container(
+                    alignment: Alignment.center,
+                    width: 180,
+                    child: Text(
+                      formattedDate.toString(),
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      date = date.add(Duration(days: 30));
-                      formattedDate = monthPickerDateFormat.format(date);
-                      clearSums();
-                    });
-                  },
-                  icon: Icon(
-                      Icons.keyboard_arrow_right,
-                      color: Colors.white, size: 40
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        date = date.add(Duration(days: 30));
+                        formattedDate = monthPickerDateFormat.format(date);
+                        clearSums();
+                      });
+                    },
+                    icon: Icon(
+                        Icons.keyboard_arrow_right,
+                        color: Colors.white, size: 40
+                    ),
+                    padding: EdgeInsets.all(0.0),
                   ),
-                  padding: EdgeInsets.all(0.0),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Container(
-            height: 38,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.indigo, width: 2),
-            ),
-            child: Column(
-              children: [
-                Row(
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                height: 38,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                  //border: Border.all(color: Colors.indigo, width: 2),
+                ),
+                child: Column(
                   children: [
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: ValueListenableBuilder(
-                          valueListenable: amountGain,
-                          builder: (context, value, widget) {
-                            return RichText(
-                              text: TextSpan(
-                                text: 'Gain: ',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.black),
-                                children: [
-                                  TextSpan(
-                                    text: amountGain.value.toStringAsFixed(2),
-                                    style: TextStyle(color: Colors.green),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: ValueListenableBuilder(
+                              valueListenable: amountGain,
+                              builder: (context, value, widget) {
+                                return RichText(
+                                  text: TextSpan(
+                                    text: 'Gain: ',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: Colors.black),
+                                    children: [
+                                      TextSpan(
+                                        text: amountGain.value.toStringAsFixed(2),
+                                        style: TextStyle(color: Colors.green),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: ValueListenableBuilder(
+                              valueListenable: amountLoss,
+                              builder: (context, value, widget) {
+                                return RichText(
+                                  text: TextSpan(
+                                    text: 'Loss: ',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: Colors.black),
+                                    children: [
+                                      TextSpan(
+                                        text: amountLoss.value.toStringAsFixed(2),
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Balance: ",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
+                        ValueListenableBuilder(
+                          valueListenable: balance,
+                          builder: (context, value, widget) {
+                            return Text(
+                              balance.value.toStringAsFixed(2),
+                              style: TextStyle(
+                                  color: balanceColor.value,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14),
                             );
                           },
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Center(
-                        child: ValueListenableBuilder(
-                          valueListenable: amountLoss,
-                          builder: (context, value, widget) {
-                            return RichText(
-                              text: TextSpan(
-                                text: 'Loss: ',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.black),
-                                children: [
-                                  TextSpan(
-                                    text: amountLoss.value.toStringAsFixed(2),
-                                    style: TextStyle(color: Colors.red),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Balance: ",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
-                    ValueListenableBuilder(
-                      valueListenable: balance,
-                      builder: (context, value, widget) {
-                        return Text(
-                          balance.value.toStringAsFixed(2),
-                          style: TextStyle(
-                              color: balanceColor.value,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-          Expanded(
-            child: transactionsListView(),
-          ),
-        ],
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: transactionsListView(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
