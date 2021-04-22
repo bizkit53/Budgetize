@@ -180,7 +180,22 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(25),
                   ),
-                  child: transactionsListView(),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+                        ),
+                        child: Text("Transaction history", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),),
+                      ),
+                      Expanded(
+                        child: transactionsListView(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
