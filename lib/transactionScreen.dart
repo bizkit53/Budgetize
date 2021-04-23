@@ -112,9 +112,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 child: TextField(
                   autofocus: true,
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  //maxLength: 18,
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r"^\d*\.?\d?\d?")),
+                    FilteringTextInputFormatter.allow(RegExp(r"^\d{0,7}(\.\d{0,2})?")),
                   ],
                   onChanged: (value) {
                     this.transactionAmount = double.tryParse(value);
@@ -124,10 +123,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       Icons.calculate,
                       color: mainColor,
                     ),
-                    /*border: new OutlineInputBorder(
-                    borderRadius: new BorderRadius.circular(50.0),
-                    borderSide: new BorderSide(),
-                  ),*/
                     hintText: "Amount",
                   ),
                 ),
@@ -159,11 +154,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
               ),
               Flexible(
                   flex: 5,
-                  //fit: FlexFit.tight,
                   child: TextButton.icon(
                     icon: Icon(Icons.calendar_today_rounded),
-                    //shape: new RoundedRectangleBorder(
-                    //    borderRadius: new BorderRadius.circular(30.0)),
                     label: Text(
                       formatted,
                       style: new TextStyle(
@@ -202,7 +194,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 flex: 5,
                 fit: FlexFit.tight,
                 child: DropdownButton(
-                  //icon: Icon(Icons.calculate),
                   hint: Text("Select category"),
                   value: selectedCategory,
                   onChanged: (Category Value) {
@@ -246,10 +237,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   },
                   decoration: InputDecoration(
                     icon: Icon(Icons.description, color: mainColor,),
-                    //border: new OutlineInputBorder(
-                    //  borderRadius: new BorderRadius.circular(50.0),
-                    //  borderSide: new BorderSide(),
-                    //),
                     hintText: "Transaction name (optional)",
                   ),
                 ),
