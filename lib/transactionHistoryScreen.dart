@@ -32,6 +32,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    clearSums();
     return Container(
       color: Color.fromRGBO(223, 223, 223, 100),
       child: SafeArea(
@@ -49,7 +50,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                       setState(() {
                         date = date.subtract(Duration(days: 30));
                         formattedDate = monthPickerDateFormat.format(date);
-                        clearSums();
                       });
                     },
                     icon: Icon(
@@ -71,7 +71,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                       setState(() {
                         date = date.add(Duration(days: 30));
                         formattedDate = monthPickerDateFormat.format(date);
-                        clearSums();
                       });
                     },
                     icon: Icon(
@@ -112,7 +111,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                                         color: Colors.black),
                                     children: [
                                       TextSpan(
-                                        text: amountGain.value.toStringAsFixed(2),
+                                        text: NumberFormat('#,###,##0.0#').format(amountGain.value).replaceAll(",", " "),
                                         style: TextStyle(color: Colors.green),
                                       ),
                                     ],
@@ -137,7 +136,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                                         color: Colors.black),
                                     children: [
                                       TextSpan(
-                                        text: amountLoss.value.toStringAsFixed(2),
+                                        text: NumberFormat('#,###,##0.0#').format(amountLoss.value).replaceAll(",", " "),
                                         style: TextStyle(color: Colors.red),
                                       ),
                                     ],
@@ -158,7 +157,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                           valueListenable: balance,
                           builder: (context, value, widget) {
                             return Text(
-                              balance.value.toStringAsFixed(2),
+                              NumberFormat('#,###,##0.0#').format(balance.value).replaceAll(",", " "),
                               style: TextStyle(
                                   color: balanceColor.value,
                                   fontWeight: FontWeight.bold,
@@ -236,6 +235,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         var transaction = filteredList.elementAt(index) as Transaction;
         var mainColor;
         var categoryIcon;
+        String sign;
 
         if (transaction.type == TransactionType.income) {
           mainColor = Colors.green;
@@ -253,12 +253,87 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             }
         }
 
+        if (transaction.type == TransactionType.income)
+          sign = "+";
+        else
+          sign = "-";
+
         return ListTile(
           leading: categoryIcon,
-          title: Text(transaction.amount.toString() ?? '',style: TextStyle(color: mainColor, fontSize: 18, fontWeight: FontWeight.bold),),
-          subtitle: Text(transactionDateFormat.format(transaction.date).toString() + "\n" + (transaction.name ?? ''),),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(transactionDateFormat.format(transaction.date).toString() +"\n" + transaction.category.toString(), style: TextStyle(fontSize: 14),),
+              Text(sign + " " + NumberFormat('#,###,##0.0#').format(transaction.amount).replaceAll(",", " "),style: TextStyle(color: mainColor, fontSize: 15, fontWeight: FontWeight.bold),),
+            ],
+          ),
+          subtitle: Text((transaction.name ?? ""),),
+          trailing: GestureDetector(
+            onTapDown: (TapDownDetails details) {
+              _showPopupMenu(details.globalPosition, index, filteredList);
+            },
+            child: Icon(Icons.more_vert, size: 22,),
+          ),
         );
       },
+    );
+  }
+
+  void _showPopupMenu(Offset offset, int transactionIndex, List<Transaction> filteredList) async {
+    double left = offset.dx;
+    double top = offset.dy - 50;
+    Transaction transactionToDelete = filteredList.elementAt(transactionIndex);
+    var transactionsBox = Hive.box<Transaction>('transactions');
+
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+      items: [
+        PopupMenuItem<String>(
+            child: TextButton(child: Text('Delete', style: TextStyle(color: Colors.black),),
+              onPressed: () {
+                Navigator.of(context).pop();
+
+                  Widget cancelButton = TextButton(
+                    child: Text("Cancel"),
+                    onPressed:  () {
+                      Navigator.of(context).pop();
+                    },
+                  );
+
+                  Widget deleteButton = TextButton(
+                    child: Text("Delete"),
+                    onPressed:  () {
+                      setState(() {
+                        for(int i = 0; i < transactionsBox.length; i++)
+                          if(transactionsBox.getAt(i) == transactionToDelete) {
+                            transactionsBox.deleteAt(i);
+                            print("Transaction deleted.");
+                          }
+                        Navigator.of(context).pop();
+                      });
+                    },
+                  );
+
+                  AlertDialog alert = AlertDialog(
+                    title: Text("Delete"),
+                    content: Text("Are you sure you want to delete this item?"),
+                    actions: [
+                      cancelButton,
+                      deleteButton,
+                    ],
+                  );
+
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return alert;
+                    },
+                  );
+              },
+            ),
+        ),
+      ],
     );
   }
 }

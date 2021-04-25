@@ -235,6 +235,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       },
                     );
                   },
+                  maxLength: 22,
                   decoration: InputDecoration(
                     icon: Icon(Icons.description, color: mainColor,),
                     hintText: "Transaction name (optional)",
