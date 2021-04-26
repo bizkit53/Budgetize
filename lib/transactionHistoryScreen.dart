@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:jiffy/jiffy.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   @override
@@ -48,7 +49,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                   IconButton(
                     onPressed: () {
                       setState(() {
-                        date = date.subtract(Duration(days: 30));
+                        var jiffy = Jiffy(date).subtract(months: 1);
+                        date = new DateTime(jiffy.year, jiffy.month);
                         formattedDate = monthPickerDateFormat.format(date);
                       });
                     },
@@ -69,7 +71,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                   IconButton(
                     onPressed: () {
                       setState(() {
-                        date = date.add(Duration(days: 30));
+                        var jiffy = Jiffy(date).add(months: 1);
+                        date = new DateTime(jiffy.year, jiffy.month);
                         formattedDate = monthPickerDateFormat.format(date);
                       });
                     },
@@ -90,7 +93,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(25),
-                  //border: Border.all(color: Colors.indigo, width: 2),
                 ),
                 child: Column(
                   children: [
@@ -151,17 +153,23 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Balance: ",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),),
                         ValueListenableBuilder(
                           valueListenable: balance,
                           builder: (context, value, widget) {
-                            return Text(
-                              NumberFormat('#,###,##0.0#').format(balance.value).replaceAll(",", " "),
-                              style: TextStyle(
-                                  color: balanceColor.value,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14),
+                            return RichText(
+                              text: TextSpan(
+                                text: "Balance: ",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: Colors.black),
+                                children: [
+                                  TextSpan(
+                                    text: NumberFormat('#,###,##0.0#').format(balance.value).replaceAll(",", " "),
+                                    style: TextStyle(color: balanceColor.value),
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         ),
