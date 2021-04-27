@@ -75,6 +75,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
           this.type);
       transactionBox.add(transaction);
 
+      if(transaction.type == TransactionType.expenditure)
+        this.account.cashAmount -= this.transactionAmount;
+      else
+        this.account.cashAmount += this.transactionAmount;
+
       print(transaction.toString());
       return true;
     }
