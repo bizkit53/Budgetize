@@ -80,6 +80,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       else
         this.account.cashAmount += this.transactionAmount;
 
+      account.save();
       print(transaction.toString());
       return true;
     }
