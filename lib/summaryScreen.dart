@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:jiffy/jiffy.dart';
 import 'transactionScreen.dart';
+import 'package:pie_chart/pie_chart.dart' as _pieChart;
 
 DateFormat formatter = DateFormat('dd-MM');
 DateTime today = DateTime.now();
@@ -17,28 +19,50 @@ class SummaryScreen extends StatefulWidget {
 
 class _SummaryScreenState extends State<SummaryScreen> {
   List<DateTime> days = [];
+  List<DateTime> months = [];
+  List<String> verbalMonth = [];
   List<String> daysFormatted = [];
-  var transactionsBox = Hive.box<Transaction>('transactions');
-  bool initialized = false;
   List<double> daySpendingAmount = [];
   List<String> daySpendingAmountCompactString = [];
   List<int> showTooltipIndicator = [];
-  double amount;
-  double maxSpendingValue = 0;
+  List<double> monthlySpendings = [];
+  List<double> monthlyIncome = [];
+  List<double> initialMonthlyBalanceOnAllAccounts = [];
+  var transactionsBox = Hive.box<Transaction>('transactions');
+  var accountsBox = Hive.box<Account>('accounts');
+  static DateFormat monthVerbalDateFormat = new DateFormat.yMMMM();
+  bool initialized = false;
+  double maxSpendingValue;
+  double allAccountsBalance;
 
   void initDays () {
     for(int i = 6; i >= 0; i--){
       var nextDay = today.subtract(Duration(days: i));
       var nextDayFormatted = formatter.format(nextDay);
+      // jiffy is the date lib used for proper month subtraction
+      DateTime jiffyDate = Jiffy().subtract(months: i).dateTime;
+      var formattedDate = monthVerbalDateFormat.format(jiffyDate);
+
       days.add(nextDay);
       daysFormatted.add(nextDayFormatted);
       daySpendingAmount.insert(6-i, 0);
       showTooltipIndicator.insert(6-i, 0);
       daySpendingAmountCompactString.insert(6-i, "");
+      monthlySpendings.insert(6-i, 0);
+      monthlyIncome.insert(6-i, 0);
+      months.insert(6-i, jiffyDate);
+      verbalMonth.insert(6-i, formattedDate);
+      initialMonthlyBalanceOnAllAccounts.insert(6-i, 0);
+      maxSpendingValue = 0;
+      allAccountsBalance = 0;
+    }
+
+    for(int i = 0; i < accountsBox.length; i++){
+      allAccountsBalance += accountsBox.getAt(i).cashAmount;
     }
   }
 
-  void calculateDaySpendings() {
+  void calculateSpendings() {
     for (int i = 0; i < transactionsBox.length; i++) {
       var transaction = transactionsBox.getAt(i);
 
@@ -52,12 +76,19 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
           daySpendingAmount[j] += transaction.amount;
         }
+
+        if(transaction.date.month == months.elementAt(j).month && transaction.date.year == months.elementAt(j).year){
+          if(transaction.type == TransactionType.expenditure)
+            monthlySpendings[j] += transaction.amount;
+          else
+            monthlyIncome[j] += transaction.amount;
+        }
       }
     }
 
     for (int j = 6; j >= 0; j--) {
       if (daySpendingAmount[j] > maxSpendingValue)
-        maxSpendingValue = daySpendingAmount[j] * 1.4;
+        maxSpendingValue = daySpendingAmount[j] * 1.25;
 
       if (daySpendingAmount[j] != 0)
         showTooltipIndicator[j] = 0;
@@ -65,6 +96,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
         showTooltipIndicator[j] = 1;
 
       daySpendingAmountCompactString[j] = NumberFormat.compact().format(daySpendingAmount[j]);
+
+      if(j == 6) {
+        initialMonthlyBalanceOnAllAccounts[j] = allAccountsBalance + monthlySpendings[j] - monthlyIncome[j];
+      }
+      else
+        initialMonthlyBalanceOnAllAccounts[j] = initialMonthlyBalanceOnAllAccounts[j + 1] + monthlySpendings[j] - monthlyIncome[j];
     }
   }
 
@@ -72,7 +109,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
   Widget build(BuildContext context) {
     if(initialized == false) {
       initDays();
-      calculateDaySpendings();
+      calculateSpendings();
       initialized = true;
     }
 
@@ -83,8 +120,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Flexible(
+              flex: 3,
               child:  Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8, bottom: 6),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -110,6 +148,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
               ),
             ),
             Flexible(
+            flex: 3,
               child:  Padding(
                 padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                   child: Container(
@@ -139,7 +178,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                   touchTooltipData: BarTouchTooltipData(
                                     tooltipBgColor: Colors.indigo,
                                     tooltipPadding: const EdgeInsets.only(bottom: -3),
-                                    tooltipMargin: 6,
+                                    tooltipMargin: 0,
                                     getTooltipItem: (
                                         BarChartGroupData group,
                                         int groupIndex,
@@ -235,8 +274,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
               ),
             ),
             Flexible(
+              flex: 3,
               child:  Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 6, bottom: 7),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -253,12 +293,16 @@ class _SummaryScreenState extends State<SummaryScreen> {
                         ),
                         child: Text("Monthly balance changes", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),),
                       ),
+                      Expanded(
+                          child: monthsSpendingListView(),
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
             Flexible(
+              flex: 2,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -288,7 +332,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                   Container(
                     width: 80,
                     height: 80,
-                    margin: EdgeInsets.only(bottom: 10),
                     child: SizedBox(
                       child: FloatingActionButton(
                           heroTag: "addIncomeButton",
@@ -319,7 +362,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
     var accountBox = Hive.box<Account>('accounts');
 
     return ListView.builder(
-      itemExtent: 46,
+      itemExtent: 43,
       itemCount: accountBox.length + 1,
       itemBuilder: (context, index) {
         if(index < accountBox.length) {
@@ -369,6 +412,89 @@ class _SummaryScreenState extends State<SummaryScreen> {
               ),
           );
         }
+      },
+    );
+  }
+
+  ListView monthsSpendingListView() {
+    return ListView.builder(
+      itemExtent: 130,
+      itemCount: months.length - 1,
+      itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 15, right: 15),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(width: 0.1)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(verbalMonth[6 - index], style: TextStyle(fontWeight: FontWeight.bold),),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: _pieChart.PieChart(
+                          dataMap: <String, double> {
+                            "Spendings" : monthlySpendings[6 - index],
+                            "Income" : monthlyIncome[6 - index],
+                          },
+                          colorList: [
+                            Colors.red,
+                            Colors.green,
+                          ],
+                          chartType: _pieChart.ChartType.ring,
+                          legendOptions: _pieChart.LegendOptions(showLegends: false),
+                          chartValuesOptions: _pieChart.ChartValuesOptions(showChartValues: false),
+                          ringStrokeWidth: 18,
+                        )
+                      ),
+                      Expanded(flex: 10,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 60, right: 8, bottom: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start  ,
+                            children: [
+                              Row(
+                                children: [
+                                  Text("Starting:"),
+                                  Spacer(),
+                                  Text(initialMonthlyBalanceOnAllAccounts[6 - index].toString()),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text("Closing:"),
+                                  Spacer(),
+                                  Text((initialMonthlyBalanceOnAllAccounts[6 - index] + monthlyIncome[6 - index] - monthlySpendings[6 - index]).toString()),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text("Change:"),
+                                  Spacer(),
+                                  Text((monthlyIncome[6 - index] - monthlySpendings[6 - index]).toString()),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
       },
     );
   }
