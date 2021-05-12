@@ -28,12 +28,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
   String transactionName;
   Account account = Hive.box<Account>('accounts').getAt(0);
   double transactionAmount;
-  DateTime date = DateTime.now();
+  DateTime date;
   Category selectedCategory;
   Category categoryType;
   List<CategoryWithIcon> categories;
   TransactionType type;
   bool valuesInitialized = false;
+  List<int> rowProportion = [1, 8, 2];
+  double iconSize = 32;
 
   bool isNull() {
     if (this.account == null ||
@@ -51,15 +53,17 @@ class _TransactionScreenState extends State<TransactionScreen> {
       this.mainColor = Colors.green;
       this.appBarTitle = "Add income";
       this.categories = incomeCategories;
-      this.selectedCategory = incomeCategories.last;
+      this.selectedCategory = incomeCategories.first;
     }
     else {
       this.mainColor = Colors.red;
       this.appBarTitle = "Add expense";
       this.categories = expenditureCategories;
-      this.selectedCategory = expenditureCategories.last;
+      this.selectedCategory = expenditureCategories.first;
     }
     this.type = widget.transactionType;
+    this.date = DateTime.now();
+    formatted = formatter.format(date);
     this.valuesInitialized = true;
   }
 
@@ -104,202 +108,282 @@ class _TransactionScreenState extends State<TransactionScreen> {
           backgroundColor: mainColor,
         ),
         body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Flexible(
-                flex: 1,
-                child: Container(),
-              ),
-              Flexible(
-                // amount
-                flex: 5,
-                fit: FlexFit.tight,
-                child: TextField(
-                  autofocus: true,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r"^\d{0,7}(\.\d{0,2})?")),
-                  ],
-                  onChanged: (value) {
-                    this.transactionAmount = double.tryParse(value);
-                  },
-                  decoration: InputDecoration(
-                    icon: Icon(
-                      Icons.calculate,
-                      color: mainColor,
-                    ),
-                    hintText: "Amount",
-                  ),
-                ),
-              ),
-              Flexible(
-                // account
-                flex: 5,
-                fit: FlexFit.tight,
-                child: DropdownButton(
-                  hint: Text("Select account"),
-                  value: account,
-                  onChanged: (Account Value) {
-                    setState(
-                      () {
-                        account = Value;
-                      },
-                    );
-                  },
-                  items: Hive.box<Account>('accounts')
-                      .values
-                      .toList()
-                      .map((Account acc) {
-                    return DropdownMenuItem<Account>(
-                      value: acc,
-                      child: Text(acc.name),
-                    );
-                  }).toList(),
-                ),
-              ),
-              Flexible(
-                  flex: 5,
-                  child: TextButton.icon(
-                    icon: Icon(Icons.calendar_today_rounded),
-                    label: Text(
-                      formatted,
-                      style: new TextStyle(
-                        fontSize: 28,
-                      ),
-                    ),
-                    onPressed: () {
-                      showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2100),
-                        builder: (BuildContext context, Widget child) {
-                          return Theme(
-                            data: ThemeData.light().copyWith(
-                              colorScheme:
-                                  ColorScheme.light(primary: mainColor),
-                            ),
-                            child: child,
-                          );
-                        },
-                      ).then(
-                        (date) {
-                          setState(
-                            () {
-                              formatted = formatter.format(date);
-                              this.date = date;
-                            },
-                          );
-                        },
-                      );
-                    },
-                  )),
-              Flexible(
-                // category
-                flex: 5,
-                fit: FlexFit.tight,
-                child: DropdownButton(
-                  hint: Text("Select category"),
-                  value: selectedCategory,
-                  onChanged: (Category Value) {
-                    setState(
-                      () {
-                        selectedCategory = Value;
-                      },
-                    );
-                  },
-                  items:
-                      this.categories.map((CategoryWithIcon category) {
-                    return DropdownMenuItem<CategoryWithIcon>(
-                      value: category,
-                      child: Row(
-                        children: <Widget>[
-                          category.icon,
-                          SizedBox(
-                            width: 45,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 15, left: 15, right: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Flexible(
+                  flex: 14,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: rowProportion[0],
+                            child: Icon(Icons.calculate, color: mainColor, size: iconSize,),
                           ),
-                          Text(
-                            category.name,
-                            style: TextStyle(color: Colors.black),
+                          Expanded(
+                            child: Container(),
+                          ),
+                          Expanded(
+                            // amount
+                            flex: rowProportion[1],
+                            child: TextField(
+                              autofocus: true,
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(RegExp(r"^\d{0,7}(\.\d{0,2})?")),
+                              ],
+                              onChanged: (value) {
+                                this.transactionAmount = double.tryParse(value);
+                              },
+                              decoration: InputDecoration(
+                                hintText: "Amount",
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: rowProportion[2],
+                            child: Container(),
                           ),
                         ],
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              Flexible(
-                // transaction name
-                flex: 5,
-                fit: FlexFit.tight,
-                child: TextField(
-                  onChanged: (String value) {
-                    setState(
-                          () {
-                        this.transactionName = value;
-                      },
-                    );
-                  },
-                  maxLength: 22,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.description, color: mainColor,),
-                    hintText: "Transaction name (optional)",
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: rowProportion[0],
+                            child: Icon(Icons.account_box_rounded, color: mainColor, size: iconSize,),
+                          ),
+                          Expanded(
+                            child: Container(),
+                          ),
+                          Expanded(
+                            // account
+                            flex: rowProportion[1],
+                            child: DropdownButton(
+                              underline: Container(height: 1, color: Colors.grey,),
+                              hint: Text("Select account"),
+                              iconSize: 0,
+                              value: account,
+                              onChanged: (Account Value) {
+                                setState(
+                                      () {
+                                    account = Value;
+                                  },
+                                );
+                              },
+                              items: Hive.box<Account>('accounts')
+                                  .values
+                                  .toList()
+                                  .map((Account acc) {
+                                return DropdownMenuItem<Account>(
+                                  value: acc,
+                                  child: Text(acc.name),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          Expanded(
+                            flex: rowProportion[2],
+                            child: Container(),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: rowProportion[0],
+                            child: Icon(Icons.calendar_today_rounded, color: mainColor, size: iconSize,),
+                          ),
+                          Expanded(
+                            child: Container(),
+                          ),
+                          Expanded(
+                            flex: rowProportion[1],
+                            child: TextButton(
+                              child: Text(
+                                formatted,
+                                style: new TextStyle(
+                                  fontSize: 28,
+                                ),
+                              ),
+                              onPressed: () {
+                                showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(1900),
+                                  lastDate: DateTime(2100),
+                                  builder: (BuildContext context, Widget child) {
+                                    return Theme(
+                                      data: ThemeData.light().copyWith(
+                                        colorScheme:
+                                        ColorScheme.light(primary: mainColor),
+                                      ),
+                                      child: child,
+                                    );
+                                  },
+                                ).then(
+                                      (date) {
+                                    setState(
+                                          () {
+                                        formatted = formatter.format(date);
+                                        this.date = date;
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            flex: rowProportion[2],
+                            child: Container(),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: rowProportion[0],
+                            child: Icon(Icons.category_rounded, color: mainColor, size: iconSize,),
+                          ),
+                          Expanded(
+                            child: Container(),
+                          ),
+                          Expanded(
+                            // category
+                            flex: rowProportion[1],
+                            child: DropdownButton(
+                              underline: Container(height: 1, color: Colors.grey,),
+                              isExpanded: true,
+                              hint: Text("Select category"),
+                              iconSize: 0,
+                              value: selectedCategory,
+                              onChanged: (Category Value) {
+                                setState(
+                                      () {
+                                    selectedCategory = Value;
+                                  },
+                                );
+                              },
+                              items:
+                              this.categories.map((CategoryWithIcon category) {
+                                return DropdownMenuItem<CategoryWithIcon>(
+                                  value: category,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Text(
+                                        category.name,
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                      category.icon,
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          Expanded(
+                            flex: rowProportion[2],
+                            child: Container(),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            flex: rowProportion[0],
+                            child: Icon(Icons.description, color: mainColor, size: iconSize,),
+                          ),
+                          Expanded(
+                            child: Container(),
+                          ),
+                          Expanded(
+                            // transaction name
+                            flex: rowProportion[1],
+                            child: TextField(
+                              onChanged: (String value) {
+                                setState(
+                                      () {
+                                    this.transactionName = value;
+                                  },
+                                );
+                              },
+                              maxLength: 20,
+                              decoration: InputDecoration(
+                                hintText: "Transaction name (optional)",
+                                counterText: "",
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: rowProportion[2],
+                            child: Container(),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Flexible(
-                // cancel and add buttons
-                flex: 18,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    SizedBox(
-                      width: 120,
-                      height: 47,
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18.0),
-                            side: BorderSide(color: mainColor)),
-                        color: mainColor,
-                        textColor: Colors.white,
-                        child: Text("Cancel"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      width: 120,
-                      height: 47,
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                          side: BorderSide(color: mainColor),
-                        ),
-                        color: mainColor,
-                        textColor: Colors.white,
-                        child: Text("Add"),
-                        onPressed: () {
-                          if(addTransaction()) {
+                Flexible(
+                  // cancel and add buttons
+                  flex: 12,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 170,
+                        height: 52,
+                        child: RaisedButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: mainColor)),
+                          color: mainColor,
+                          textColor: Colors.white,
+                          child: Text("Cancel", style: TextStyle(fontSize: 20),),
+                          onPressed: () {
+                            this.valuesInitialized = false;
                             Navigator.of(context).pop();
-                          }
-                          else{
-                            Fluttertoast.showToast(msg: "Some required fields have been omitted.",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.CENTER,
-                              timeInSecForIosWeb: 1,
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                              fontSize: 16.0);
-                          };
-                        },
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                      SizedBox(
+                        width: 170,
+                        height: 52,
+                        child: RaisedButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                            side: BorderSide(color: mainColor),
+                          ),
+                          color: mainColor,
+                          textColor: Colors.white,
+                          child: Text("Add", style: TextStyle(fontSize: 20),),
+                          onPressed: () {
+                            if(addTransaction()) {
+                              this.valuesInitialized = false;
+                              Navigator.of(context).pop();
+                            }
+                            else{
+                              Fluttertoast.showToast(msg: "Some required fields have been omitted.",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.CENTER,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0);
+                            };
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
