@@ -1,10 +1,13 @@
 import 'package:budgetize/category.dart';
 import 'package:budgetize/transaction.dart';
+import 'package:budgetize/transactionScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+
+import 'account.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   @override
@@ -273,7 +276,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(transactionDateFormat.format(transaction.date).toString() +"\n" + transaction.category.toString(), style: TextStyle(fontSize: 14),),
+              Text(transactionDateFormat.format(transaction.date).toString() +"\n" + transaction.account.name, style: TextStyle(fontSize: 14),),
               Text(sign + " " + NumberFormat('#,###,##0.0#').format(transaction.amount).replaceAll(",", " "),style: TextStyle(color: mainColor, fontSize: 15, fontWeight: FontWeight.bold),),
             ],
           ),
@@ -292,7 +295,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   void _showPopupMenu(Offset offset, int transactionIndex, List<Transaction> filteredList) async {
     double left = offset.dx;
     double top = offset.dy - 50;
-    Transaction transactionToDelete = filteredList.elementAt(transactionIndex);
+    Transaction selectedTransaction = filteredList.elementAt(transactionIndex);
     var transactionsBox = Hive.box<Transaction>('transactions');
 
     await showMenu(
@@ -315,10 +318,37 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     child: Text("Delete"),
                     onPressed:  () {
                       setState(() {
-                        for(int i = 0; i < transactionsBox.length; i++)
-                          if(transactionsBox.getAt(i) == transactionToDelete) {
+                        bool deleted = false;
+                        for(int i = 0; i < transactionsBox.length && deleted == false; i++)
+                          if(transactionsBox.getAt(i) == selectedTransaction) {
+                            var accountBox = Hive.box<Account>('accounts');
+                            bool accountFound = false;
+
+                            for (int j = 0; j < accountBox.length && accountFound == false; j++) {
+                              /*print(j.toString() + "\n"
+                                  + transactionToDelete.account.name + "\n"
+                                  + transactionToDelete.account.cashAmount.toString() + "\n"
+                                  + transactionToDelete.account.currency.toString() + "\n"
+                                  + accountBox.getAt(j).name + "\n"
+                                  + accountBox.getAt(j).cashAmount.toString() + "\n"
+                                  + accountBox.getAt(j).currency.toString() + "\n\n"
+                              );*/
+                              if(selectedTransaction.account == accountBox.getAt(j)) {
+                                accountFound = true;
+                                print("\n\n\nBefore:\naccount: " + accountBox.getAt(j).cashAmount.toString() + "\ntransaction: " + selectedTransaction.amount.toString());
+                                if(selectedTransaction.type == TransactionType.expenditure)
+                                  accountBox.getAt(j).cashAmount += selectedTransaction.amount;
+                                else
+                                  accountBox.getAt(j).cashAmount -= selectedTransaction.amount;
+
+                                accountBox.getAt(j).save();
+                                print("After:\n account: " + accountBox.getAt(j).cashAmount.toString() + "\ntransaction: " + selectedTransaction.amount.toString());
+                              }
+                            }
+
                             transactionsBox.deleteAt(i);
                             print("Transaction deleted.");
+                            deleted = true;
                           }
                         Navigator.of(context).pop();
                       });
