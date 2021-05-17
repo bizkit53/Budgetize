@@ -1,5 +1,6 @@
 import 'package:budgetize/account.dart';
 import 'package:budgetize/category.dart';
+import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 
@@ -16,7 +17,7 @@ enum TransactionType {
 }
 
 @HiveType(typeId: 3)
-class Transaction {
+class Transaction extends HiveObject with EquatableMixin {
   @HiveField(0)
   String name;
   @HiveField(1)
@@ -49,5 +50,10 @@ class Transaction {
         "Category: ${this.category.toString()}\n" +
         "Ammount: ${this.amount}\n";
     return output;
+  }
+
+  @override
+  List<Object> get props {
+    return [name, account, amount, date, category, type];
   }
 }

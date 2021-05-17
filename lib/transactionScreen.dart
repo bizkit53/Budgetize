@@ -1,11 +1,9 @@
-import 'package:budgetize/main.dart';
 import 'package:budgetize/transaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/number_symbols_data.dart';
 import 'account.dart';
 import 'category.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -26,23 +24,25 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Color mainColor;
   String appBarTitle;
   String transactionName;
+  String secondButtonText;
   Account account = Hive.box<Account>('accounts').getAt(0);
   double transactionAmount;
+  double iconSize = 32;
   DateTime date;
   Category selectedCategory;
   Category categoryType;
   List<CategoryWithIcon> categories;
-  TransactionType type;
-  bool valuesInitialized = false;
   List<int> rowProportion = [1, 8, 2];
-  double iconSize = 32;
+  TransactionType transactionType;
+  bool valuesInitialized = false;
+
 
   bool isNull() {
     if (this.account == null ||
         this.transactionAmount == null ||
         this.date == null ||
         this.selectedCategory == null ||
-        this.type == null)
+        this.transactionType == null)
       return true;
     else
       return false;
@@ -61,41 +61,67 @@ class _TransactionScreenState extends State<TransactionScreen> {
       this.categories = expenditureCategories;
       this.selectedCategory = expenditureCategories.first;
     }
-    this.type = widget.transactionType;
+    this.transactionType = widget.transactionType;
     this.date = DateTime.now();
     formatted = formatter.format(date);
     this.valuesInitialized = true;
+    this.secondButtonText = "Add";
   }
 
   bool addTransaction() {
     if (isNull() == false) {
       var transactionBox = Hive.box<Transaction>('transactions');
+
+      if(transactionType == TransactionType.expenditure)
+        this.account.cashAmount -= this.transactionAmount;
+      else
+        this.account.cashAmount += this.transactionAmount;
+
+      this.account.save();
+
       var transaction = new Transaction(
           this.transactionName,
           this.transactionAmount,
           this.account,
           this.date,
           this.selectedCategory,
-          this.type);
+          this.transactionType);
       transactionBox.add(transaction);
 
-      if(transaction.type == TransactionType.expenditure)
-        this.account.cashAmount -= this.transactionAmount;
-      else
-        this.account.cashAmount += this.transactionAmount;
-
-      account.save();
-      print(transaction.toString());
+      updateAccountBalanceInAppropriateTransactions(this.account);
       return true;
     }
     else
       return false;
   }
 
+  void updateAccountBalanceInAppropriateTransactions(Account updatedAccount){
+    var transactionsBox = Hive.box<Transaction>('transactions');
+
+    for(int i = 0; i < transactionsBox.length; i++){
+      if(transactionsBox.getAt(i).account.name == updatedAccount.name) {
+        transactionsBox.getAt(i).account = updatedAccount;
+        transactionsBox.getAt(i).save();
+      }
+    }
+  }
+
+  void showToastFieldsOmmitted(){
+    Fluttertoast.showToast(
+        msg: "Some required fields have been omitted.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
+
   @override
   Widget build(BuildContext context) {
     if(valuesInitialized == false)
       setTransactionType();
+
     return Theme(
       data: ThemeData(
         primarySwatch: mainColor,
@@ -130,8 +156,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           Expanded(
                             // amount
                             flex: rowProportion[1],
-                            child: TextField(
+                            child: TextFormField(
                               autofocus: true,
+                              initialValue: this.transactionAmount != null ? this.transactionAmount.toString() : "",
                               keyboardType: TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(RegExp(r"^\d{0,7}(\.\d{0,2})?")),
@@ -305,7 +332,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           Expanded(
                             // transaction name
                             flex: rowProportion[1],
-                            child: TextField(
+                            child: TextFormField(
+                              initialValue: this.transactionName != null ? this.transactionName.toString() : "",
                               onChanged: (String value) {
                                 setState(
                                       () {
@@ -361,21 +389,15 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           ),
                           color: mainColor,
                           textColor: Colors.white,
-                          child: Text("Add", style: TextStyle(fontSize: 20),),
+                          child: Text(secondButtonText, style: TextStyle(fontSize: 20),),
                           onPressed: () {
-                            if(addTransaction()) {
+                            if (addTransaction()) {
                               this.valuesInitialized = false;
                               Navigator.of(context).pop();
                             }
-                            else{
-                              Fluttertoast.showToast(msg: "Some required fields have been omitted.",
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  gravity: ToastGravity.CENTER,
-                                  timeInSecForIosWeb: 1,
-                                  backgroundColor: Colors.red,
-                                  textColor: Colors.white,
-                                  fontSize: 16.0);
-                            };
+                            else {
+                              showToastFieldsOmmitted();
+                            }
                           },
                         ),
                       ),

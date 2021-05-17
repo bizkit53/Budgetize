@@ -34,6 +34,17 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     balanceColor.value = Colors.black;
   }
 
+  void updateAccountBalanceInApropriateTransactionsAfterTransactionRemoval(Account updatedAccount){
+    var transactionsBox = Hive.box<Transaction>('transactions');
+
+    for(int i = 0; i < transactionsBox.length; i++){
+      if(transactionsBox.getAt(i).account.name == updatedAccount.name) {
+        transactionsBox.getAt(i).account = updatedAccount;
+        transactionsBox.getAt(i).save();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     clearSums();
@@ -325,30 +336,24 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                             bool accountFound = false;
 
                             for (int j = 0; j < accountBox.length && accountFound == false; j++) {
-                              /*print(j.toString() + "\n"
-                                  + transactionToDelete.account.name + "\n"
-                                  + transactionToDelete.account.cashAmount.toString() + "\n"
-                                  + transactionToDelete.account.currency.toString() + "\n"
-                                  + accountBox.getAt(j).name + "\n"
-                                  + accountBox.getAt(j).cashAmount.toString() + "\n"
-                                  + accountBox.getAt(j).currency.toString() + "\n\n"
-                              );*/
                               if(selectedTransaction.account == accountBox.getAt(j)) {
                                 accountFound = true;
-                                print("\n\n\nBefore:\naccount: " + accountBox.getAt(j).cashAmount.toString() + "\ntransaction: " + selectedTransaction.amount.toString());
-                                if(selectedTransaction.type == TransactionType.expenditure)
-                                  accountBox.getAt(j).cashAmount += selectedTransaction.amount;
-                                else
-                                  accountBox.getAt(j).cashAmount -= selectedTransaction.amount;
 
+                                if(selectedTransaction.type == TransactionType.expenditure) {
+                                  accountBox.getAt(j).cashAmount += selectedTransaction.amount;
+                                  selectedTransaction.account = accountBox.getAt(j);
+                                }
+                                else {
+                                  accountBox.getAt(j).cashAmount -= selectedTransaction.amount;
+                                  selectedTransaction.account = accountBox.getAt(j);
+                                }
                                 accountBox.getAt(j).save();
-                                print("After:\n account: " + accountBox.getAt(j).cashAmount.toString() + "\ntransaction: " + selectedTransaction.amount.toString());
+                                updateAccountBalanceInApropriateTransactionsAfterTransactionRemoval(accountBox.getAt(j));
+                                transactionsBox.deleteAt(i);
+                                print("Transaction deleted.");
+                                deleted = true;
                               }
                             }
-
-                            transactionsBox.deleteAt(i);
-                            print("Transaction deleted.");
-                            deleted = true;
                           }
                         Navigator.of(context).pop();
                       });
