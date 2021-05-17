@@ -316,7 +316,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           onPressed: () {
                             print("Add expenditure button pressed.");
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => TransactionScreen(transactionType: TransactionType.expenditure,))).then((value) {
+                                builder: (context) => TransactionScreen(transactionType: TransactionType.expenditure, editMode: false, transactionToEdit: null,))).then((value) {
                                   setState(() {
                                     initialized = false;
                                   });
@@ -325,7 +325,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           backgroundColor: Colors.red,
                           child: Icon(
                             Icons.remove,
-                            size: 45,
+                            size: 50,
                           )),
                     ),
                   ),
@@ -339,7 +339,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           onPressed: () {
                             print("Add income button pressed.");
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => TransactionScreen(transactionType: TransactionType.income,))).then((value) {
+                                builder: (context) => TransactionScreen(transactionType: TransactionType.income, editMode: false, transactionToEdit: null,))).then((value) {
                                   setState(() {
                                     initialized = false;
                                   });

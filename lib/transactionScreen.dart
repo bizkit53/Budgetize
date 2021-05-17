@@ -13,8 +13,10 @@ String formatted = formatter.format(DateTime.now());
 
 class TransactionScreen extends StatefulWidget {
   final TransactionType transactionType;
+  final bool editMode;
+  final Transaction transactionToEdit;
 
-  const TransactionScreen({Key key, this.transactionType }) : super(key: key);
+  const TransactionScreen({Key key, this.transactionType, this.editMode, this.transactionToEdit }) : super(key: key);
 
   @override
   _TransactionScreenState createState() => _TransactionScreenState();
@@ -26,6 +28,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
   String transactionName;
   String secondButtonText;
   Account account = Hive.box<Account>('accounts').getAt(0);
+  Account initialAccountOfEditedTransaction;
+  double initialAmountOfEditedTransaction;
   double transactionAmount;
   double iconSize = 32;
   DateTime date;
@@ -35,6 +39,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   List<int> rowProportion = [1, 8, 2];
   TransactionType transactionType;
   bool valuesInitialized = false;
+  bool editModeInitialized = false;
 
 
   bool isNull() {
@@ -106,6 +111,64 @@ class _TransactionScreenState extends State<TransactionScreen> {
     }
   }
 
+  void editModeDataSetter(){
+    this.editModeInitialized = true;
+    this.secondButtonText = "Edit";
+    this.transactionAmount = widget.transactionToEdit.amount;
+    this.transactionName = widget.transactionToEdit.name;
+    this.transactionType = widget.transactionType;
+    this.date = widget.transactionToEdit.date;
+    this.initialAmountOfEditedTransaction = widget.transactionToEdit.amount;
+    formatted = formatter.format(date);
+
+    for (int i = 0; i < Hive.box<Account>('accounts').length; i++){
+      var tempAccount = Hive.box<Account>('accounts').getAt(i);
+      if (identical(widget.transactionToEdit.account, tempAccount)) {
+        this.account = tempAccount;
+        this.initialAccountOfEditedTransaction = tempAccount;
+        print("done");
+      }
+    }
+
+    for (int i = 0; i < categories.length; i++){
+      if(categories.elementAt(i) == widget.transactionToEdit.category)
+        this.selectedCategory = categories.elementAt(i);
+    }
+  }
+
+  bool editTransaction() {
+    if (isNull() == false) {
+      widget.transactionToEdit.account = this.account;
+      widget.transactionToEdit.category = this.selectedCategory;
+      widget.transactionToEdit.date = this.date;
+      widget.transactionToEdit.name = this.transactionName;
+
+      if(widget.transactionToEdit.type == TransactionType.expenditure) {
+        this.initialAccountOfEditedTransaction.cashAmount += widget.transactionToEdit.amount;
+        widget.transactionToEdit.account.cashAmount -= this.transactionAmount;
+      }
+      else{
+        this.initialAccountOfEditedTransaction.cashAmount -= widget.transactionToEdit.amount;
+        widget.transactionToEdit.account.cashAmount += this.transactionAmount;
+      }
+
+      widget.transactionToEdit.amount = this.transactionAmount;
+      this.initialAccountOfEditedTransaction.save();
+      widget.transactionToEdit.account.save();
+
+      if(widget.transactionToEdit.account.name == this.initialAccountOfEditedTransaction)
+        updateAccountBalanceInAppropriateTransactions(widget.transactionToEdit.account);
+      else{
+        updateAccountBalanceInAppropriateTransactions(widget.transactionToEdit.account);
+        updateAccountBalanceInAppropriateTransactions(this.initialAccountOfEditedTransaction);
+      }
+
+      return true;
+    }
+    else
+      return false;
+  }
+
   void showToastFieldsOmmitted(){
     Fluttertoast.showToast(
         msg: "Some required fields have been omitted.",
@@ -121,6 +184,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Widget build(BuildContext context) {
     if(valuesInitialized == false)
       setTransactionType();
+    if(widget.editMode == true && editModeInitialized == false)
+      editModeDataSetter();
 
     return Theme(
       data: ThemeData(
@@ -358,7 +423,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ),
                 ),
                 Flexible(
-                  // cancel and add buttons
+                  // cancel and add/edit buttons
                   flex: 12,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -391,12 +456,22 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           textColor: Colors.white,
                           child: Text(secondButtonText, style: TextStyle(fontSize: 20),),
                           onPressed: () {
-                            if (addTransaction()) {
-                              this.valuesInitialized = false;
-                              Navigator.of(context).pop();
+                            if(widget.editMode == false) {
+                              if (addTransaction()) {
+                                this.valuesInitialized = false;
+                                Navigator.of(context).pop();
+                              }
+                              else {
+                                showToastFieldsOmmitted();
+                              }
                             }
                             else {
-                              showToastFieldsOmmitted();
+                              if(editTransaction()){
+                                Navigator.of(context).pop();
+                              }
+                              else {
+                                showToastFieldsOmmitted();
+                              }
                             }
                           },
                         ),

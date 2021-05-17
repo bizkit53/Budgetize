@@ -314,6 +314,20 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
         PopupMenuItem<String>(
+          child: TextButton(child: Text('Edit', style: TextStyle(color: Colors.black),),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      TransactionScreen(
+                        transactionType: selectedTransaction.type, editMode: true, transactionToEdit: selectedTransaction,))).then((value) {
+                setState(() {
+                });
+              });
+            },
+          ),
+        ),
+        PopupMenuItem<String>(
             child: TextButton(child: Text('Delete', style: TextStyle(color: Colors.black),),
               onPressed: () {
                 Navigator.of(context).pop();
