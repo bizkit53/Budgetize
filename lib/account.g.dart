@@ -63,7 +63,8 @@ class AccountAdapter extends TypeAdapter<Account> {
     return Account(
       fields[0] as String,
       fields[1] as Currencies,
-    )..cashAmount = fields[2] as double;
+      fields[2] as double,
+    );
   }
 
   @override

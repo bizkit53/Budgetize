@@ -12,10 +12,10 @@ class Account extends HiveObject with EquatableMixin {
   @HiveField(2)
   double cashAmount;
 
-  Account(String name, Currencies currency){
+  Account(String name, Currencies currency, double initialBalance){
     this.name = name;
     this.currency = currency;
-    this.cashAmount = 0;
+    this.cashAmount = initialBalance;
   }
 
   @override

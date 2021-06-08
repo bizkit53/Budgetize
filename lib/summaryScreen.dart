@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
+import 'accountScreen.dart';
 import 'transactionScreen.dart';
 import 'package:pie_chart/pie_chart.dart' as _pieChart;
 
@@ -404,7 +405,13 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     child: IconButton(
                       icon: Icon(Icons.add_circle, size: 28,),
                       onPressed: () {
-                        print("Add account - button pressed");
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                AccountScreen(editMode: false, accountToEdit: null,))).then((value) {
+                          setState(() {
+                            print("Add account - button pressed");
+                          });
+                        });
                       },
                     ),
                   ),
