@@ -37,6 +37,19 @@ class _SummaryScreenState extends State<SummaryScreen> {
   double allAccountsBalance;
 
   void initDays () {
+    days = [];
+    daysFormatted = [];
+    daySpendingAmount = [];
+    showTooltipIndicator = [];
+    daySpendingAmountCompactString = [];
+    monthlySpendings = [];
+    monthlyIncome = [];
+    months = [];
+    verbalMonth = [];
+    initialMonthlyBalanceOnAllAccounts = [];
+    maxSpendingValue = 0;
+    allAccountsBalance = 0;
+
     for(int i = 6; i >= 0; i--){
       var nextDay = today.subtract(Duration(days: i));
       var nextDayFormatted = formatter.format(nextDay);
@@ -54,12 +67,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
       months.insert(6-i, jiffyDate);
       verbalMonth.insert(6-i, formattedDate);
       initialMonthlyBalanceOnAllAccounts.insert(6-i, 0);
-      maxSpendingValue = 0;
-      allAccountsBalance = 0;
     }
 
     for(int i = 0; i < accountsBox.length; i++){
-      allAccountsBalance += accountsBox.getAt(i).cashAmount;
+      allAccountsBalance += accountsBox.getAt(i).currentBalance;
     }
   }
 
@@ -378,14 +389,20 @@ class _SummaryScreenState extends State<SummaryScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(flex: 5, child: Text(account.name, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),)),
-                  Expanded(flex: 5, child: Text(account.cashAmount.toString())),
+                  Expanded(flex: 5, child: Text(account.name, style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),)),
+                  Expanded(flex: 5, child: Text(account.currentBalance.toString())),
                   Expanded(
                     flex: 1,
                     child: IconButton(
                       icon: Icon(Icons.edit, size: 28),
                       onPressed: () {
-                        print("Edit account $index - button pressed");
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                AccountScreen(editMode: true, accountToEdit: account,))).then((value) {
+                          setState(() {
+                            print("Edit account - button pressed");
+                          });
+                        });
                       },
                     ),
                   ),
@@ -400,7 +417,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(flex: 10, child: Text("Add account", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),)),
+                  Expanded(flex: 10, child: Text("Add account", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),)),
                   Expanded(flex: 1,
                     child: IconButton(
                       icon: Icon(Icons.add_circle, size: 28,),
