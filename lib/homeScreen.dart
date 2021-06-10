@@ -26,6 +26,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        toolbarHeight: 0,
         title: Text('Budgetize', style: TextStyle(fontWeight: FontWeight.bold),),
       ),
       body: GestureDetector(
@@ -54,8 +55,8 @@ class _HomeState extends State<Home> {
           BottomNavigationBarItem(
               icon: Icon(Icons.schedule), title: Text('Transactions')),
           BottomNavigationBarItem(
-            icon: new Icon(Icons.bar_chart),
-            title: new Text('Analysis'),
+            icon: new Icon(Icons.category_outlined),
+            title: new Text('Categories'),
           ),
         ],
       ),

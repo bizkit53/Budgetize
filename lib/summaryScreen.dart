@@ -306,7 +306,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                         child: Text("Monthly balance changes", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),),
                       ),
                       Expanded(
-                          child: monthsSpendingListView(),
+                        child: monthsSpendingListView(),
                       ),
                     ],
                   ),
@@ -374,7 +374,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
     var accountBox = Hive.box<Account>('accounts');
 
     return ListView.builder(
-      itemExtent: 43,
+      itemExtent: 51,
       itemCount: accountBox.length + 1,
       itemBuilder: (context, index) {
         if(index < accountBox.length) {
@@ -393,17 +393,11 @@ class _SummaryScreenState extends State<SummaryScreen> {
                   Expanded(flex: 5, child: Text(account.currentBalance.toString())),
                   Expanded(
                     flex: 1,
-                    child: IconButton(
-                      icon: Icon(Icons.edit, size: 28),
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                AccountScreen(editMode: true, accountToEdit: account,))).then((value) {
-                          setState(() {
-                            print("Edit account - button pressed");
-                          });
-                        });
+                    child: GestureDetector(
+                      onTapDown: (TapDownDetails details) {
+                        _showPopupMenu(details.globalPosition, index, account);
                       },
+                      child: Icon(Icons.more_vert, size: 28,),
                     ),
                   ),
                 ],
@@ -419,9 +413,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 children: [
                   Expanded(flex: 10, child: Text("Add account", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),)),
                   Expanded(flex: 1,
-                    child: IconButton(
-                      icon: Icon(Icons.add_circle, size: 28,),
-                      onPressed: () {
+                    child: GestureDetector(
+                      child: Icon(Icons.add_circle, size: 28,),
+                      onTapDown: (TapDownDetails details) {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
                                 AccountScreen(editMode: false, accountToEdit: null,))).then((value) {
@@ -442,7 +436,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
   ListView monthsSpendingListView() {
     return ListView.builder(
-      itemExtent: 130,
+      itemExtent: 155,
       itemCount: months.length - 1,
       itemBuilder: (context, index) {
           return Padding(
@@ -457,7 +451,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                         child: Text(verbalMonth[6 - index], style: TextStyle(fontWeight: FontWeight.bold),),
                       ),
                     ],
@@ -466,7 +460,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Expanded(
-                        flex: 3,
+                        flex: 4,
                         child: _pieChart.PieChart(
                           dataMap: <String, double> {
                             "Spendings" : monthlySpendings[6 - index],
@@ -478,15 +472,15 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           ],
                           chartType: _pieChart.ChartType.ring,
                           legendOptions: _pieChart.LegendOptions(showLegends: false),
-                          chartValuesOptions: _pieChart.ChartValuesOptions(showChartValues: false),
+                          chartValuesOptions: _pieChart.ChartValuesOptions(showChartValuesInPercentage: true),
                           ringStrokeWidth: 18,
                         )
                       ),
                       Expanded(flex: 10,
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 60, right: 8, bottom: 20),
+                          padding: const EdgeInsets.only(left: 20, right: 8),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start  ,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
@@ -520,6 +514,84 @@ class _SummaryScreenState extends State<SummaryScreen> {
             ),
           );
       },
+    );
+  }
+
+  void _showPopupMenu(Offset offset, int accountIndex, Account selectedAccount) async {
+    double left = offset.dx;
+    double top = offset.dy - 50;
+
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+      items: [
+        PopupMenuItem<String>(
+          child: TextButton(child: Text('Edit', style: TextStyle(color: Colors.black),),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      AccountScreen(editMode: true, accountToEdit: selectedAccount,))).then((value) {
+                setState(() {
+                  print("Edit account - button pressed");
+                  this.initialized = false;
+                });
+              });
+            },
+          ),
+        ),
+        PopupMenuItem<String>(
+          child: TextButton(child: Text('Delete', style: TextStyle(color: Colors.black),),
+            onPressed: () {
+              Navigator.of(context).pop();
+
+              Widget cancelButton = TextButton(
+                child: Text("Cancel"),
+                onPressed:  () {
+                  Navigator.of(context).pop();
+                },
+              );
+
+              Widget deleteButton = TextButton(
+                child: Text("Delete"),
+                onPressed:  () {
+                  setState(() {
+                    print("Delete account - button pressed");
+                    if(accountsBox.getAt(accountIndex).name == selectedAccount.name){
+                      for(int i = 0; i < transactionsBox.length; i++){
+                        if(transactionsBox.getAt(i).account.name == selectedAccount.name) {
+                          transactionsBox.deleteAt(i);
+                          i = -1;
+                        }
+                      }
+                      accountsBox.deleteAt(accountIndex);
+                      print("Account " + selectedAccount.name + " deleted.");
+                      this.initialized = false;
+                    }
+                    Navigator.of(context).pop();
+                  });
+                },
+              );
+
+              AlertDialog alert = AlertDialog(
+                title: Text("Delete"),
+                content: Text("Are you sure you want to delete this account and all related transactions?"),
+                actions: [
+                  cancelButton,
+                  deleteButton,
+                ],
+              );
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return alert;
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
