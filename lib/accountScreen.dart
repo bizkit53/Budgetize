@@ -1,4 +1,5 @@
 import 'package:budgetize/account.dart';
+import 'package:budgetize/transaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,8 +10,7 @@ class AccountScreen extends StatefulWidget {
   final bool editMode;
   final Account accountToEdit;
 
-  const AccountScreen({Key key, this.editMode, this.accountToEdit})
-      : super(key: key);
+  const AccountScreen({Key key, this.editMode, this.accountToEdit}) : super(key: key);
 
   @override
   _AccountScreenState createState() => _AccountScreenState();
@@ -22,17 +22,18 @@ class _AccountScreenState extends State<AccountScreen> {
   String newAccountName;
   String secondButtonText;
   double iconSize = 32;
-  double accountBalance;
+  double initialAccountBalance;
   bool valuesInitialized = false;
   List<int> rowProportion = [1, 8, 2];
 
   bool addAccount() {
-    this.newAccountName = this.newAccountName.trim();
+    if(this.newAccountName != null)
+      this.newAccountName = this.newAccountName.trim();
 
     if (accountWithThisNameExists() == false){
-      if(this.newAccountName != null && this.accountBalance != null){
+      if(this.newAccountName != null && this.initialAccountBalance != null){
         var accountBox = Hive.box<Account>('accounts');
-        Account wallet = new Account(this.newAccountName, Currencies.USD, this.accountBalance);
+        Account wallet = new Account(this.newAccountName, Currencies.USD, this.initialAccountBalance);
         accountBox.add(wallet);
         return true;
       }
@@ -47,8 +48,57 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  void editAccount() {
-    throw Exception("not implemented yet");
+  bool editAccount() {
+    Account oldAccount = new Account(widget.accountToEdit.name, widget.accountToEdit.currency, widget.accountToEdit.initialBalance);
+    oldAccount.currentBalance = widget.accountToEdit.currentBalance;
+
+    if(this.newAccountName.toLowerCase() == widget.accountToEdit.name.toLowerCase()){
+      if(this.initialAccountBalance != null) {
+        widget.accountToEdit.initialBalance = this.initialAccountBalance;
+        widget.accountToEdit.currentBalance = oldAccount.currentBalance - oldAccount.initialBalance + this.initialAccountBalance;
+        widget.accountToEdit.save();
+        updateAccountDetailsInAppropriateTransactions(oldAccount, widget.accountToEdit);
+        return true;
+      }
+      else{
+        showToastFieldsOmmitted();
+        return false;
+      }
+    }
+    else{
+      if(accountWithThisNameExists() == false) {
+        if(this.newAccountName != null && this.initialAccountBalance != null){
+          widget.accountToEdit.name = this.newAccountName;
+          widget.accountToEdit.initialBalance = this.initialAccountBalance;
+          widget.accountToEdit.currentBalance = oldAccount.currentBalance - oldAccount.initialBalance + this.initialAccountBalance;
+          widget.accountToEdit.save();
+          updateAccountDetailsInAppropriateTransactions(oldAccount, widget.accountToEdit);
+          return true;
+        }
+        else{
+          showToastFieldsOmmitted();
+          return false;
+        }
+      }
+      else{
+        showToastAccountAlreadyExists();
+        return false;
+      }
+    }
+  }
+
+  void updateAccountDetailsInAppropriateTransactions(Account currentAccount, Account updatedAccount){
+    var transactionsBox = Hive.box<Transaction>('transactions');
+
+    for(int i = 0; i < transactionsBox.length; i++){
+      if(transactionsBox.getAt(i).account.name.toLowerCase() == currentAccount.name.toLowerCase()) {
+        transactionsBox.getAt(i).account.name = updatedAccount.name;
+        transactionsBox.getAt(i).account.initialBalance = updatedAccount.initialBalance;
+        transactionsBox.getAt(i).account.currentBalance = updatedAccount.currentBalance;
+        transactionsBox.getAt(i).account.currency = updatedAccount.currency;
+      }
+      transactionsBox.getAt(i).save();
+    }
   }
 
   bool accountWithThisNameExists() {
@@ -88,7 +138,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   bool setMode() {
     this.mainColor = Theme.of(context).primaryColor;
-    this.accountBalance = 0;
+    this.initialAccountBalance = 0;
     this.valuesInitialized = true;
 
     if (widget.editMode == false) {
@@ -97,7 +147,7 @@ class _AccountScreenState extends State<AccountScreen> {
     } else {
       this.appBarTitle = 'Edit account';
       this.secondButtonText = 'Edit';
-      this.accountBalance = widget.accountToEdit.cashAmount;
+      this.initialAccountBalance = widget.accountToEdit.initialBalance;
       this.newAccountName = widget.accountToEdit.name;
     }
   }
@@ -147,7 +197,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 },
                               );
                             },
-                            maxLength: 20,
+                            maxLength: 10,
                             decoration: InputDecoration(
                               labelText: "Account name",
                               hintText: "Enter account name",
@@ -174,13 +224,13 @@ class _AccountScreenState extends State<AccountScreen> {
                           // amount
                           flex: rowProportion[1],
                           child: TextFormField(
-                            initialValue: this.accountBalance != null ? this.accountBalance.toString() : "",
+                            initialValue: this.initialAccountBalance != null ? this.initialAccountBalance.toString() : "",
                             keyboardType: TextInputType.numberWithOptions(decimal: true),
                             inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp(r"^\d{0,9}(\.\d{0,2})?")),
+                              FilteringTextInputFormatter.allow(RegExp(r"^\-?\d{0,9}(\.\d{0,2})?")),
                             ],
                             onChanged: (value) {
-                              this.accountBalance = double.tryParse(value);
+                              this.initialAccountBalance = double.tryParse(value);
                             },
                             decoration: InputDecoration(
                               labelText: "Initial account balance",
@@ -236,7 +286,9 @@ class _AccountScreenState extends State<AccountScreen> {
                             }
                           }
                           else{
-                            editAccount();
+                            if(editAccount()){
+                              Navigator.of(context).pop();
+                            }
                           }
                         },
                       ),

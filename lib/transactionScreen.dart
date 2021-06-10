@@ -78,9 +78,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
       var transactionBox = Hive.box<Transaction>('transactions');
 
       if(transactionType == TransactionType.expenditure)
-        this.account.cashAmount -= this.transactionAmount;
+        this.account.currentBalance -= this.transactionAmount;
       else
-        this.account.cashAmount += this.transactionAmount;
+        this.account.currentBalance += this.transactionAmount;
 
       this.account.save();
 
@@ -126,7 +126,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
       if (identical(widget.transactionToEdit.account, tempAccount)) {
         this.account = tempAccount;
         this.initialAccountOfEditedTransaction = tempAccount;
-        print("done");
       }
     }
 
@@ -144,12 +143,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
       widget.transactionToEdit.name = this.transactionName;
 
       if(widget.transactionToEdit.type == TransactionType.expenditure) {
-        this.initialAccountOfEditedTransaction.cashAmount += widget.transactionToEdit.amount;
-        widget.transactionToEdit.account.cashAmount -= this.transactionAmount;
+        this.initialAccountOfEditedTransaction.currentBalance += widget.transactionToEdit.amount;
+        widget.transactionToEdit.account.currentBalance -= this.transactionAmount;
       }
       else{
-        this.initialAccountOfEditedTransaction.cashAmount -= widget.transactionToEdit.amount;
-        widget.transactionToEdit.account.cashAmount += this.transactionAmount;
+        this.initialAccountOfEditedTransaction.currentBalance -= widget.transactionToEdit.amount;
+        widget.transactionToEdit.account.currentBalance += this.transactionAmount;
       }
 
       widget.transactionToEdit.amount = this.transactionAmount;

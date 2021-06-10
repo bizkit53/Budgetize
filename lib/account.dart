@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 
 part 'account.g.dart';
 
@@ -10,12 +11,15 @@ class Account extends HiveObject with EquatableMixin {
   @HiveField(1)
   Currencies currency;
   @HiveField(2)
-  double cashAmount;
+  double currentBalance;
+  @HiveField(3)
+  double initialBalance;
 
   Account(String name, Currencies currency, double initialBalance){
-    this.name = name;
+    this.name = toBeginningOfSentenceCase(name);
     this.currency = currency;
-    this.cashAmount = initialBalance;
+    this.currentBalance = initialBalance;
+    this.initialBalance = initialBalance;
   }
 
   @override
@@ -25,7 +29,7 @@ class Account extends HiveObject with EquatableMixin {
 
   @override
   List<Object> get props {
-    return [name, currency, cashAmount];
+    return [name, currency, currentBalance, initialBalance];
   }
 }
 

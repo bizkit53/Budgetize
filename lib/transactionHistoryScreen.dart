@@ -354,11 +354,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                                 accountFound = true;
 
                                 if(selectedTransaction.type == TransactionType.expenditure) {
-                                  accountBox.getAt(j).cashAmount += selectedTransaction.amount;
+                                  accountBox.getAt(j).currentBalance += selectedTransaction.amount;
                                   selectedTransaction.account = accountBox.getAt(j);
                                 }
                                 else {
-                                  accountBox.getAt(j).cashAmount -= selectedTransaction.amount;
+                                  accountBox.getAt(j).currentBalance -= selectedTransaction.amount;
                                   selectedTransaction.account = accountBox.getAt(j);
                                 }
                                 accountBox.getAt(j).save();
