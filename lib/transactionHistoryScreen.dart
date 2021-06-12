@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
-
 import 'account.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
@@ -25,6 +24,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   final checkSum = ValueNotifier<double>(0);
   final balance = ValueNotifier<double>(0);
   final balanceColor = ValueNotifier<Color>(Colors.black);
+  bool initialized = false;
+  List<Account> accounts = [];
+  Account account;
 
   void clearSums() {
     amountLoss.value = 0;
@@ -45,9 +47,22 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     }
   }
 
+  void initAccountList(){
+    accounts.clear();
+    account = Account('All accounts ', Currencies.USD, 0);
+    accounts.add(account);
+    for(int i = 0; i < Hive.box<Account>('accounts').length; i++)
+      accounts.add(Hive.box<Account>('accounts').getAt(i));
+
+    this.initialized = true;
+  }
+
   @override
   Widget build(BuildContext context) {
     clearSums();
+    if(this.initialized == false)
+      initAccountList();
+
     return Container(
       color: Color.fromRGBO(223, 223, 223, 100),
       child: SafeArea(
@@ -56,7 +71,56 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             Container(
               height: 45,
               width: double.infinity,
-              color: Colors.indigo,
+              decoration: BoxDecoration(
+                color: Colors.indigo,
+                border: Border.all(
+                  width: 0,
+                  color: Colors.indigo,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(),
+                  ),
+                  Expanded(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                        value: account,
+                        onChanged: (Account value) {
+                          setState(
+                                () {
+                              account = value;
+                            },
+                          );
+                        },
+                        dropdownColor: Colors.indigo,
+                        iconEnabledColor: Colors.white,
+                        items: this.accounts.map((Account acc) {
+                          return DropdownMenuItem<Account>(
+                            value: acc,
+                            child: Text(acc.name, style: TextStyle(color: Colors.white),),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              height: 45,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.indigo,
+                border: Border.all(
+                  width: 0,
+                  color: Colors.indigo,
+                ),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -231,14 +295,27 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     List<Transaction> filteredList = List.empty(growable: true);
 
     for (int i = 0; i < transactionsBox.length; i++) {
-      if (transactionsBox.getAt(i).date.year == date.year && transactionsBox.getAt(i).date.month == date.month) {
-        filteredList.add(transactionsBox.getAt(i));
-        this.checkSum.value += transactionsBox.getAt(i).amount;
+      if (this.account == this.accounts.elementAt(0)) {
+        if (transactionsBox.getAt(i).date.year == date.year && transactionsBox.getAt(i).date.month == date.month) {
+          filteredList.add(transactionsBox.getAt(i));
+          this.checkSum.value += transactionsBox.getAt(i).amount;
 
-        if (transactionsBox.getAt(i).type == TransactionType.income)
-          this.amountGain.value += transactionsBox.getAt(i).amount;
-        else
-          this.amountLoss.value += transactionsBox.getAt(i).amount;
+          if (transactionsBox.getAt(i).type == TransactionType.income)
+            this.amountGain.value += transactionsBox.getAt(i).amount;
+          else
+            this.amountLoss.value += transactionsBox.getAt(i).amount;
+        }
+      }
+      else{
+        if (transactionsBox.getAt(i).account.name == this.account.name && transactionsBox.getAt(i).date.year == date.year && transactionsBox.getAt(i).date.month == date.month) {
+          filteredList.add(transactionsBox.getAt(i));
+          this.checkSum.value += transactionsBox.getAt(i).amount;
+
+          if (transactionsBox.getAt(i).type == TransactionType.income)
+            this.amountGain.value += transactionsBox.getAt(i).amount;
+          else
+            this.amountLoss.value += transactionsBox.getAt(i).amount;
+        }
       }
 
       if (i == transactionsBox.length - 1) {
