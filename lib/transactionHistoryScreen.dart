@@ -330,6 +330,16 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
     filteredList.sort((a, b) => a.date.compareTo(b.date));
 
+    if (filteredList.length == 0)
+      return ListView.builder(
+          itemCount: 1,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Center(child: Text("No transaction found")),
+            );
+          }
+      );
+
     return ListView.builder(
       itemCount: filteredList.length,
       itemBuilder: (context, index) {
