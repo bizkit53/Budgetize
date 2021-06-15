@@ -99,7 +99,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
     }
 
     for (int j = 6; j >= 0; j--) {
-      if (daySpendingAmount[j] > maxSpendingValue)
+      if (daySpendingAmount[j] > maxSpendingValue / 1.25)
         maxSpendingValue = daySpendingAmount[j] * 1.25;
 
       if (daySpendingAmount[j] != 0)
