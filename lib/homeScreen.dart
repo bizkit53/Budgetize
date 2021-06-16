@@ -1,9 +1,9 @@
+import 'package:budgetize/categoryParticipationScreen.dart';
 import 'package:budgetize/summaryScreen.dart';
 import 'package:budgetize/transactionHistoryScreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'placeholder_widget.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -17,7 +17,7 @@ class _HomeState extends State<Home> {
   final List<Widget> _children = [
     SummaryScreen(),
     TransactionHistoryScreen(),
-    PlaceholderWidget(Colors.green)
+    CategoryParticipationScreen(),
   ];
 
 
