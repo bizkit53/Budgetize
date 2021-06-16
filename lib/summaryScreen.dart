@@ -2,6 +2,7 @@ import 'package:budgetize/account.dart';
 import 'package:budgetize/transaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -115,6 +116,17 @@ class _SummaryScreenState extends State<SummaryScreen> {
       else
         initialMonthlyBalanceOnAllAccounts[j] = initialMonthlyBalanceOnAllAccounts[j + 1] + monthlySpendings[j] - monthlyIncome[j];
     }
+  }
+
+  void showToastAccountListIsEmpty(){
+    Fluttertoast.showToast(
+        msg: "There is no account to which the transaction can be assigned.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   @override
@@ -327,12 +339,17 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           elevation: 0,
                           onPressed: () {
                             print("Add expenditure button pressed.");
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => TransactionScreen(transactionType: TransactionType.expenditure, editMode: false, transactionToEdit: null,))).then((value) {
-                                  setState(() {
-                                    initialized = false;
-                                  });
+                            if (accountsBox.length != 0) {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) =>
+                                      TransactionScreen(transactionType: TransactionType.expenditure, editMode: false, transactionToEdit: null,))).then((value) {
+                                setState(() {
+                                  initialized = false;
                                 });
+                              });
+                            }
+                            else
+                              showToastAccountListIsEmpty();
                           },
                           backgroundColor: Colors.red,
                           child: Icon(
@@ -350,12 +367,17 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           elevation: 0,
                           onPressed: () {
                             print("Add income button pressed.");
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => TransactionScreen(transactionType: TransactionType.income, editMode: false, transactionToEdit: null,))).then((value) {
-                                  setState(() {
-                                    initialized = false;
-                                  });
+                            if (accountsBox.length != 0) {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) =>
+                                      TransactionScreen(transactionType: TransactionType.income, editMode: false, transactionToEdit: null,))).then((value) {
+                                setState(() {
+                                  initialized = false;
                                 });
+                              });
+                            }
+                            else
+                              showToastAccountListIsEmpty();
                           },
                           backgroundColor: Colors.green,
                           child: Icon(Icons.add, size: 45)),
