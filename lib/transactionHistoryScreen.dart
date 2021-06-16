@@ -81,32 +81,28 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Container(),
-                  ),
-                  Expanded(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton(
-                        value: account,
-                        onChanged: (Account value) {
-                          setState(
-                                () {
-                              account = value;
-                            },
-                          );
-                        },
-                        dropdownColor: Colors.indigo,
-                        iconEnabledColor: Colors.white,
-                        items: this.accounts.map((Account acc) {
-                          return DropdownMenuItem<Account>(
-                            value: acc,
-                            child: Text(acc.name, style: TextStyle(color: Colors.white),),
-                          );
-                        }).toList(),
+                    child: Center(
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                          value: account,
+                          onChanged: (Account value) {
+                            setState(
+                                  () {
+                                account = value;
+                              },
+                            );
+                          },
+                          dropdownColor: Colors.indigo,
+                          iconEnabledColor: Colors.white,
+                          items: this.accounts.map((Account acc) {
+                            return DropdownMenuItem<Account>(
+                              value: acc,
+                              child: Text(acc.name, style: TextStyle(color: Colors.white),),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Container(),
                   ),
                 ],
               ),
