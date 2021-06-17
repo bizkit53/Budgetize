@@ -15,17 +15,21 @@ void main() async {
   Directory document = await getApplicationDocumentsDirectory();
   await Hive.registerAdapter(CurrenciesAdapter());
   await Hive.registerAdapter(AccountAdapter());
-  Hive.registerAdapter(CategoryAdapter());
-  Hive.registerAdapter(TransactionTypeAdapter());
-  Hive.registerAdapter(TransactionAdapter());
+  await Hive.registerAdapter(CategoryAdapter());
+  await Hive.registerAdapter(TransactionTypeAdapter());
+  await Hive.registerAdapter(TransactionAdapter());
   Hive.init(document.path);
   final transactionsBox = await Hive.openBox<Transaction>('transactions');
   final accountBox = await Hive.openBox<Account>('accounts');
+  final firstLaunchCheckBox = await Hive.openBox('firstLaunchFlag');
 
-  if (accountBox.length == 0) { // default wallet
-    Account wallet = new Account("wallet", Currencies.USD);
-    accountBox.add(wallet);
+  if (firstLaunchCheckBox.length == 0 || firstLaunchCheckBox.getAt(0) == false) { // default wallet
+    Account cash = new Account("Cash", Currencies.USD, 0);
+    accountBox.add(cash);
+    bool valuesInitialized = true;
+    firstLaunchCheckBox.add(valuesInitialized);
   }
+
   runApp(MyApp());
 }
 
