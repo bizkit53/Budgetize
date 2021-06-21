@@ -412,7 +412,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Expanded(flex: 5, child: Text(account.name, style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),)),
-                  Expanded(flex: 5, child: Text(account.currentBalance.toString())),
+                  Expanded(flex: 5, child: Text(NumberFormat(' ###,###,###,##0.0#').format(account.currentBalance).replaceAll(",", " "))),
                   Expanded(
                     flex: 1,
                     child: GestureDetector(
@@ -508,21 +508,21 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                 children: [
                                   Text("Starting:"),
                                   Spacer(),
-                                  Text(initialMonthlyBalanceOnAllAccounts[6 - index].toString()),
+                                  Text(NumberFormat(' ###,###,###,##0.0#').format(initialMonthlyBalanceOnAllAccounts[6 - index]).replaceAll(",", " ")),
                                 ],
                               ),
                               Row(
                                 children: [
                                   Text("Closing:"),
                                   Spacer(),
-                                  Text((initialMonthlyBalanceOnAllAccounts[6 - index] + monthlyIncome[6 - index] - monthlySpendings[6 - index]).toString()),
+                                  Text(NumberFormat(' ###,###,###,##0.0#').format((initialMonthlyBalanceOnAllAccounts[6 - index] + monthlyIncome[6 - index] - monthlySpendings[6 - index])).replaceAll(",", " ")),
                                 ],
                               ),
                               Row(
                                 children: [
                                   Text("Change:"),
                                   Spacer(),
-                                  Text((monthlyIncome[6 - index] - monthlySpendings[6 - index]).toString()),
+                                  Text(NumberFormat(' ###,###,###,##0.0#').format(monthlyIncome[6 - index] - monthlySpendings[6 - index]).replaceAll(",", " ")),
                                 ],
                               ),
                             ],
