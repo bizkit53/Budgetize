@@ -64,7 +64,7 @@ class AccountAdapter extends TypeAdapter<Account> {
       fields[0] as String,
       fields[1] as Currencies,
       fields[3] as double,
-    );
+    )..currentBalance = fields[2] as double;
   }
 
   @override

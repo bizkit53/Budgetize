@@ -155,7 +155,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       this.initialAccountOfEditedTransaction.save();
       widget.transactionToEdit.account.save();
 
-      if(widget.transactionToEdit.account.name == this.initialAccountOfEditedTransaction)
+      if(widget.transactionToEdit.account.name == this.initialAccountOfEditedTransaction.name)
         updateAccountBalanceInAppropriateTransactions(widget.transactionToEdit.account);
       else{
         updateAccountBalanceInAppropriateTransactions(widget.transactionToEdit.account);
