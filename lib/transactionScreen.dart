@@ -121,6 +121,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
     this.initialAmountOfEditedTransaction = widget.transactionToEdit.amount;
     formatted = formatter.format(date);
 
+    if (widget.transactionType == TransactionType.income)
+      this.appBarTitle = "Edit income";
+    else
+      this.appBarTitle = "Edit expense";
+
     for (int i = 0; i < Hive.box<Account>('accounts').length; i++){
       var tempAccount = Hive.box<Account>('accounts').getAt(i);
       if (identical(widget.transactionToEdit.account, tempAccount)) {
