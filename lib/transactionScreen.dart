@@ -231,7 +231,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 this.transactionAmount = double.tryParse(value);
                               },
                               decoration: InputDecoration(
-                                hintText: "Amount",
+                                labelText: "Transaction amount",
                               ),
                             ),
                           ),
@@ -253,9 +253,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           Expanded(
                             // account
                             flex: rowProportion[1],
-                            child: DropdownButton(
-                              underline: Container(height: 1, color: Colors.grey,),
-                              hint: Text("Select account"),
+                            child: DropdownButtonFormField(
+                              decoration: InputDecoration(
+                                labelText: "Account",
+                              ),
                               iconSize: 0,
                               value: account,
                               onChanged: (Account Value) {
@@ -346,10 +347,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           Expanded(
                             // category
                             flex: rowProportion[1],
-                            child: DropdownButton(
-                              underline: Container(height: 1, color: Colors.grey,),
+                            child: DropdownButtonFormField(
+                              decoration: InputDecoration(
+                                labelText: "Category",
+                              ),
                               isExpanded: true,
-                              hint: Text("Select category"),
                               iconSize: 0,
                               value: selectedCategory,
                               onChanged: (Category Value) {
@@ -407,7 +409,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                               },
                               maxLength: 20,
                               decoration: InputDecoration(
-                                hintText: "Transaction name (optional)",
+                                labelText: "Transaction name (optional)",
                                 counterText: "",
                               ),
                             ),
